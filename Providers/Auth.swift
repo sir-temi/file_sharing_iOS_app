@@ -14,10 +14,10 @@ struct AuthModel: Codable, Identifiable {
 }
 
 extension Dictionary {
-    func percentEncoded() -> Data? {
+    func encodeData() -> Data? {
         return map { key, value in
-            let escapedKey = "\(key)".addingPercentEncoding(withAllowedCharacters: .urlQueryValueAllowed) ?? ""
-            let escapedValue = "\(value)".addingPercentEncoding(withAllowedCharacters: .urlQueryValueAllowed) ?? ""
+            let escapedKey = "\(key)".addingPercentEncoding(withAllowedCharacters: .urlQuery) ?? ""
+            let escapedValue = "\(value)".addingPercentEncoding(withAllowedCharacters: .urlQuery) ?? ""
             return escapedKey + "=" + escapedValue
         }
         .joined(separator: "&")
@@ -26,8 +26,8 @@ extension Dictionary {
 }
 
 extension CharacterSet {
-    static let urlQueryValueAllowed: CharacterSet = {
-        let generalDelimitersToEncode = ":#[]@" // does not include "?" or "/" due to RFC 3986 - Section 3.4
+    static let urlQuery: CharacterSet = {
+        let generalDelimitersToEncode = ":#[]@"
         let subDelimitersToEncode = "!$&'()*+,;="
 
         var allowed = CharacterSet.urlQueryAllowed
@@ -48,7 +48,7 @@ class AuthApi{
                 "username": username.lowercased(),
                 "password": password
                 ]
-        let jsonInfo = info.percentEncoded()
+        let jsonInfo = info.encodeData()
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.httpBody = jsonInfo
@@ -85,17 +85,16 @@ class AuthApi{
         }
     }
     
-//    func getToken(completion: @escaping (String?) -> ()){
-//        completion(token)
-//    }
     
     func getToken() -> String{
         return token
     }
     
+    
     func getUserName() -> String{
         return userName
     }
+    
     
     func logOut() -> Bool{
         token = ""

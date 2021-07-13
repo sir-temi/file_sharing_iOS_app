@@ -9,12 +9,14 @@ import SwiftUI
 import UIKit
 
 struct UploadView: View {
+    @Environment(\.presentationMode) var presentationMode
     
     @State var showImagePicker: Bool = false
     @State var imageSelected: UIImage = UIImage(named: "dog1")!
     @State var sourceType: UIImagePickerController.SourceType = .camera
     
     @State var showSelectedImageView: Bool = false
+    
     var body: some View {
         VStack{
             Button(action: {

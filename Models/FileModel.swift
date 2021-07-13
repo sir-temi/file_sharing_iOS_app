@@ -27,40 +27,26 @@ struct FileModel: Codable, Identifiable {
     
 }
 
-struct FileDetailModel: Codable, Identifiable {
-    let id = UUID()
-    var identifier: String
-    var downloaded: Int
-    var mime_type: String
-    var size_mb: String
-    var thumbnail: String
-    var title: String
-    var uploaded_date: String
-    var authorised_user: String?
-    var description: String
-    var owner: Dictionary<String, String>
-    var location: String
-    var restricted_by_user: Bool
-    var restricted_by_country: Bool
-    
-    
+extension NSMutableData {
+    func appendString(string: String) {
+        let data = string.data(using: String.Encoding.utf8, allowLossyConversion: true)
+        append(data!)
+    }
 }
-
-
 
 class FileApi {
     let token = AuthApi().getToken()
     
-    func getFiles(completion: @escaping ([FileModel]) -> ()) {
+    func getFiles(completion: @escaping ([[String:Any]]) -> ()) {
         guard let url = URL(string: "http://127.0.0.1:8000/api/v1/files/") else { return }
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         
         URLSession.shared.dataTask(with: request) { data, response, error in
-                    guard let data = data else{ return }
-                    do{
-                        let decodedData =  try JSONDecoder().decode([FileModel].self, from: data)
+            guard let data = data else{ return }
+            do {
+                let decodedData = try JSONSerialization.jsonObject(with: data) as! [[String:Any]]
                         DispatchQueue.main.async {
                             completion(decodedData)
                         }
@@ -103,4 +89,95 @@ class FileApi {
                     }
                 }.resume()
     }
-}
+    
+    
+    func uploadFile(imageToUpload: UIImage, byUser: Bool, byCountry: Bool, title: String, description: String, authUser: String, sizeMb: String, sizeBytes: Double) {
+        
+        let hashers = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+        let imagename = String((0..<6).map{ _ in hashers.randomElement()! })
+        let fileName = "\(imagename).jpg"
+        
+        guard let countryUrl = URL(string: "http://ip-api.com/json") else { return }
+        var request1 = URLRequest(url: countryUrl)
+        request1.httpMethod = "GET"
+        
+    
+        let myUrl = NSURL(string: "http://127.0.0.1:8000/api/v1/files/");
+        let request = NSMutableURLRequest(url:myUrl! as URL);
+        request.httpMethod = "POST";
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        let param = [
+            "title"  : title,
+            "description"    : description,
+            "authorised_user": authUser,
+            "bytes" : String(format: "%f", sizeBytes),
+            "mb" : sizeMb,
+            "location" : "",
+            "restricted_by_user" : byUser,
+            "restricted_by_country": byCountry,
+            "file_name": fileName,
+            
+        ] as [String : Any]
+        
+        let boundary = generateBoundaryString()
+        request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
+
+
+        let imageData = imageToUpload.jpegData(compressionQuality: 1)
+        if imageData == nil  {
+            return
+        }
+
+        request.httpBody = encodeBody(parameters: param, filePathKey: "file", imageDataKey: imageData! as NSData, boundary: boundary, fileName: fileName) as Data
+
+        let task = URLSession.shared.dataTask(with: request as URLRequest) {
+            data, response, error in
+
+                if error != nil {
+                    print("error=\(error!)")
+                    return
+                }
+
+                let responseString = NSString(data: data!, encoding: String.Encoding.utf8.rawValue)
+                print("response data = \(responseString!)")
+
+            }
+
+            task.resume()
+        }
+
+
+
+
+    func encodeBody(parameters: [String: Any]?, filePathKey: String?, imageDataKey: NSData, boundary: String, fileName: String) -> NSData {
+            let body = NSMutableData();
+
+            if parameters != nil {
+                for (key, value) in parameters! {
+                    body.appendString(string: "--\(boundary)\r\n")
+                    body.appendString(string: "Content-Disposition: form-data; name=\"\(key)\"\r\n\r\n")
+                    body.appendString(string: "\(value)\r\n")
+                }
+            }
+
+            let filename = fileName
+            let mimetype = "image/jpg"
+
+            body.appendString(string: "--\(boundary)\r\n")
+            body.appendString(string: "Content-Disposition: form-data; name=\"\(filePathKey!)\"; filename=\"\(filename)\"\r\n")
+            body.appendString(string: "Content-Type: \(mimetype)\r\n\r\n")
+            body.append(imageDataKey as Data)
+            body.appendString(string: "\r\n")
+            body.appendString(string: "--\(boundary)--\r\n")
+
+            return body
+        }
+
+        func generateBoundaryString() -> String {
+            return "Boundary-\(NSUUID().uuidString)"
+        }
+
+    }
+
+   
+

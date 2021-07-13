@@ -10,14 +10,17 @@ import SwiftUI
 struct PostImageView: View {
     
     @Environment(\.presentationMode) var presentationMode
-    @State var captonText: String = ""
+    @State var title: String = ""
+    @State var description: String = ""
     @State var restrictCountry = false
     @State var restrictUser = false
-    @State var username = ""
     @Binding var imageSelected: UIImage
+    @State var navigateNow: Bool = false
+    @State var authUser: String = ""
     
     var body: some View {
         VStack(alignment: /*@START_MENU_TOKEN@*/.center/*@END_MENU_TOKEN@*/, spacing: /*@START_MENU_TOKEN@*/nil/*@END_MENU_TOKEN@*/, content: {
+            NavigationLink(destination: DashboardView(), isActive: $navigateNow) { EmptyView() }
             HStack {
                 Button(action: {
                     presentationMode.wrappedValue.dismiss()
@@ -39,7 +42,17 @@ struct PostImageView: View {
                     .cornerRadius(12)
                     .clipped()
                 
-                TextField("Add your capton here", text: $captonText)
+                TextField("File title", text: $title)
+                    .padding()
+                    .frame(height: 60)
+                    .frame(maxWidth: .infinity)
+                    .font(.headline)
+                    .padding(.horizontal)
+                    .autocapitalization(.sentences)
+//                    .background(Color.MyTheme.lightGreenColor)
+                    .border(Color.MyTheme.darkGreenColor, width: 1)
+                
+                TextField("Descripption", text: $description)
                     .padding()
                     .frame(height: 60)
                     .frame(maxWidth: .infinity)
@@ -55,7 +68,7 @@ struct PostImageView: View {
                 Toggle("Restrict by User", isOn: $restrictUser)
                 
                 if restrictUser{
-                    TextField("Username", text: $captonText)
+                    TextField("Username", text: $authUser)
                         .padding()
                         .frame(height: 60)
                         .frame(maxWidth: .infinity)
@@ -68,7 +81,7 @@ struct PostImageView: View {
                     
                 
                 Button(action: {
-                    
+                    uploadImage()
                 }, label: {
                     HStack {
                         Image(systemName: "square.and.arrow.up")
@@ -89,8 +102,19 @@ struct PostImageView: View {
     }
     
     //MARK: FUNCTIONS
-    func postFile(){
-        print("UPLOAD FILE")
+    func uploadImage(){
+        let data = imageSelected.pngData()!
+        @State var bytes : Double = Double(data.count)
+        if((Double(data.count) / 1024) > 1000){
+            FileApi().uploadFile(imageToUpload: imageSelected, byUser: restrictUser, byCountry: restrictCountry, title: title, description: description, authUser: authUser, sizeMb: "\(String(format: "%.1f", (Double(data.count) / (1024 * 1024)))) MB", sizeBytes: bytes)
+            navigateNow = true
+            presentationMode.wrappedValue.dismiss()
+        }else{
+            FileApi().uploadFile(imageToUpload: imageSelected, byUser: restrictUser, byCountry: restrictCountry, title: title, description: description, authUser: authUser, sizeMb: "\(String(format: "%.1f", (Double(data.count) / 1024))) KB", sizeBytes: bytes)
+            navigateNow = true
+            presentationMode.wrappedValue.dismiss()
+            
+        }
     }
 }
 

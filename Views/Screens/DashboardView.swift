@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct DashboardView: View {
-    @State var files: [FileModel] = []
+    @State var files: [[String:Any]] = []
     @State var isLoading: Bool = true
     
     var body: some View {
@@ -33,8 +33,9 @@ struct DashboardView: View {
             
             ScrollView(.vertical, showsIndicators: false, content: {
                 LazyVStack{
-                ForEach(files) { file in
-                    FileSubView(file: file)
+                    
+                    ForEach(files.indices, id:\.self) { i in
+                        FileSubView(file: FileModel(identifier: files[i]["identifier"] as! String, downloaded: files[i]["downloaded"] as! Int, mime_type: files[i]["mime_type"] as! String, size_mb: files[i]["size_mb"] as! String, thumbnail: files[i]["thumbnail"] as! String, title: files[i]["title"] as! String, uploaded_date: files[i]["uploaded_date"] as! String, authorised_user:  files[i]["authorised_user"] as? String, description: files[i]["description"] as! String, owner: files[i]["owner"] as! Dictionary<String, String>, location: files[i]["location"] as! String, restricted_by_user: files[i]["restricted_by_user"] as! Bool, restricted_by_country: files[i]["restricted_by_country"] as! Bool))
                     Divider()
                     }
                 }

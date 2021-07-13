@@ -11,12 +11,12 @@ struct SearchFIleView: View {
     @State var fileNumber: String = ""
     @State var showAlert: Bool = false
     @State var isLoading: Bool = false
-    @State var navigatenow: Bool = false
+    @State var navigateNow: Bool = false
     @State var file: FileModel = FileModel(identifier: "iriri", downloaded: 8, mime_type: "image/audio", size_mb: "5 MB", thumbnail: "images/video.png", title: "A good book", uploaded_date: "Jul 11, 2021", authorised_user: "", description: "A very nice video", owner: ["username":"engryankey"], location: "London", restricted_by_user: false, restricted_by_country: true)
     
     var body: some View {
         VStack{
-            NavigationLink(destination: FileDetailView(file: file), isActive: $navigatenow) { EmptyView() }
+            NavigationLink(destination: FileDetailView(file: file), isActive: $navigateNow) { EmptyView() }
             if(isLoading == false){
             TextField("File number", text: $fileNumber)
                 .padding()
@@ -73,7 +73,7 @@ struct SearchFIleView: View {
             } else {
                 self.file = file
                 isLoading = false
-                navigatenow = true
+                navigateNow = true
             }
         }
     }

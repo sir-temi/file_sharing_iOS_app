@@ -39,8 +39,7 @@ struct FileDetailView: View {
             ScrollView(.vertical, showsIndicators: false, content: {
                 VStack{
                     ZStack{
-//                        Image(uiImage: "http://127.0.0.1:8000\(file.thumbnail)".load())
-                        Image("dog1")
+                        Image(uiImage: "http://127.0.0.1:8000\(file.thumbnail)".load())
                             .resizable()
                             .scaledToFit()
                             .frame(width: 200, height: 200, alignment: /*@START_MENU_TOKEN@*/.center/*@END_MENU_TOKEN@*/)
