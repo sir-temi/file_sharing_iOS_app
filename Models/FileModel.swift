@@ -110,7 +110,7 @@ class FileApi {
             "title"  : title,
             "description"    : description,
             "authorised_user": authUser,
-            "bytes" : String(format: "%f", sizeBytes),
+            "bytes" : String(format: "%.0f", sizeBytes),
             "mb" : sizeMb,
             "location" : "",
             "restricted_by_user" : byUser,

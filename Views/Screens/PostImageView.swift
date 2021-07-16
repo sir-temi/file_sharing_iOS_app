@@ -17,6 +17,7 @@ struct PostImageView: View {
     @Binding var imageSelected: UIImage
     @State var navigateNow: Bool = false
     @State var authUser: String = ""
+    @State private var showAlert = false
     
     var body: some View {
         VStack(alignment: /*@START_MENU_TOKEN@*/.center/*@END_MENU_TOKEN@*/, spacing: /*@START_MENU_TOKEN@*/nil/*@END_MENU_TOKEN@*/, content: {
@@ -96,6 +97,9 @@ struct PostImageView: View {
                 }).frame(minWidth: /*@START_MENU_TOKEN@*/0/*@END_MENU_TOKEN@*/, idealWidth: /*@START_MENU_TOKEN@*/100/*@END_MENU_TOKEN@*/, maxWidth: /*@START_MENU_TOKEN@*/.infinity/*@END_MENU_TOKEN@*/, alignment: /*@START_MENU_TOKEN@*/.center/*@END_MENU_TOKEN@*/)
                 .background(Color.MyTheme.darkGreenColor)
                 .cornerRadius(30)
+                .alert(isPresented: $showAlert, content: {
+                        Alert(title: Text("Invalid File Number"), message: Text("The file number you searched is invalid."), dismissButton: .default(Text("Try Again")))
+                })
                 
             })
         }).padding(.horizontal)
@@ -113,7 +117,6 @@ struct PostImageView: View {
             FileApi().uploadFile(imageToUpload: imageSelected, byUser: restrictUser, byCountry: restrictCountry, title: title, description: description, authUser: authUser, sizeMb: "\(String(format: "%.1f", (Double(data.count) / 1024))) KB", sizeBytes: bytes)
             navigateNow = true
             presentationMode.wrappedValue.dismiss()
-            
         }
     }
 }

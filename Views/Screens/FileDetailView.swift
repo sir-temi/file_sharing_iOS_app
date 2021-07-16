@@ -85,14 +85,15 @@ struct FileDetailView: View {
                         
                     }
                     Text(file.title)
-                        .font(.largeTitle)
+                        .font(.title)
                         .fontWeight(/*@START_MENU_TOKEN@*/.bold/*@END_MENU_TOKEN@*/)
                         .foregroundColor(Color.MyTheme.darkGreenColor)
                     
                     Text(file.description)
-                        .font(.title2)
+                        .font(.title3)
                         .fontWeight(/*@START_MENU_TOKEN@*/.bold/*@END_MENU_TOKEN@*/)
                         .padding(.bottom)
+                        .multilineTextAlignment(.center)
                     
                     VStack{
                         HStack{
@@ -195,7 +196,6 @@ struct FileDetailView: View {
                     
                 }
             })
-            .padding(.all, 20)
             
             } else {
                 
@@ -203,7 +203,8 @@ struct FileDetailView: View {
             
             }
             
-        }
+        }.padding(.vertical, 5)
+        .padding(.horizontal, 15)
         .onAppear(perform: {
             self.fileDate = convertDate(date: file.uploaded_date)
             isLoading = false
